@@ -8,17 +8,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     var popoverMonitor: AnyObject?
     
     override init() {
+        popover = NSPopover()
+        popover.contentViewController = ContentViewController()
         statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(24)
+        
+        super.init()
+        setupStatusButton()
+    }
+    
+    func setupStatusButton() {
         if let statusButton = statusItem.button {
             statusButton.image = NSImage(named: "Status")
             statusButton.alternateImage = NSImage(named: "StatusHighlighted")
-            statusButton.action = "onPress:"
+
+            //
+            // WORKAROUND
+            //
+            // DummyControl interferes mouseDown events to keep statusButton highlighted while popover is open.
+            //
+            let dummyControl = DummyControl()
+            dummyControl.frame = statusButton.bounds
+            statusButton.addSubview(dummyControl)
+            statusButton.superview!.subviews = [statusButton, dummyControl]
+            dummyControl.action = "onPress:"
+            dummyControl.target = self
         }
-        
-        popover = NSPopover()
-        popover.contentViewController = ContentViewController()
-        
-        super.init()
     }
     
     func onPress(sender: AnyObject) {
@@ -32,6 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     
     func openPopover() {
         if let statusButton = statusItem.button {
+            statusButton.highlight(true)
             popover.showRelativeToRect(NSZeroRect, ofView: statusButton, preferredEdge: NSMinYEdge)
             popoverMonitor = NSEvent.addGlobalMonitorForEventsMatchingMask(.LeftMouseDownMask, handler: { (event: NSEvent!) -> Void in
                 self.closePopover()
@@ -41,6 +56,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     
     func closePopover() {
         popover.close()
+        if let statusButton = statusItem.button {
+            statusButton.highlight(false)
+        }
         if let monitor : AnyObject = popoverMonitor {
             NSEvent.removeMonitor(monitor)
             popoverMonitor = nil
