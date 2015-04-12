@@ -1,12 +1,14 @@
 import Cocoa
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     
     let statusItem: NSStatusItem
     let popover: NSPopover
+    var popoverMonitor: AnyObject?
     
     override init() {
+        
         statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(24)
         if let statusButton = statusItem.button {
             statusButton.image = NSImage(named: "Status")
@@ -15,18 +17,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         popover = NSPopover()
-        popover.behavior = .Transient
         popover.contentViewController = ContentViewController()
     }
     
     func onPress(sender: AnyObject) {
+        if popover.shown == false {
+            openPopover()
+        }
+        else {
+            closePopover()
+        }
+    }
+    
+    func openPopover() {
         if let statusButton = statusItem.button {
-            if popover.shown {
-                popover.close()
-            }
-            else {
-                popover.showRelativeToRect(NSZeroRect, ofView: statusButton, preferredEdge: NSMinYEdge)
-            }
+            popover.showRelativeToRect(NSZeroRect, ofView: statusButton, preferredEdge: NSMinYEdge)
+            popoverMonitor = NSEvent.addGlobalMonitorForEventsMatchingMask(.LeftMouseDownMask, handler: { (event: NSEvent!) -> Void in
+                self.closePopover()
+            })
+        }
+    }
+    
+    func closePopover() {
+        popover.close()
+        if let monitor : AnyObject = popoverMonitor {
+            NSEvent.removeMonitor(monitor)
+            popoverMonitor = nil
         }
     }
 }
