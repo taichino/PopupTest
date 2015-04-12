@@ -8,7 +8,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     var popoverMonitor: AnyObject?
     
     override init() {
-        
         statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(24)
         if let statusButton = statusItem.button {
             statusButton.image = NSImage(named: "Status")
@@ -18,6 +17,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         
         popover = NSPopover()
         popover.contentViewController = ContentViewController()
+        
+        super.init()
     }
     
     func onPress(sender: AnyObject) {
