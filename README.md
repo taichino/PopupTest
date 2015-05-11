@@ -12,5 +12,8 @@ Statusbar app sample for Mac (Yosemite or later)
 #### Note
 See header files of NSStatusItem and NSStatusBarButton for details. They don't show up in official documents for some reason.
 
+### Reference
+For OS X Marvericks https://github.com/shpakovski/Popup
+
 ## License
 MIT
